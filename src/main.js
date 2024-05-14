@@ -12,6 +12,13 @@ const loaderMarkup  = '<div id="loader" class="loader"></div>';
 
 const searchForm = document.querySelector('.search-form');
 
+let currentPage = 1;
+let totalImages = 0;
+
+const searchBtn = document.querySelector('.btn-submit');
+const loadMoreBtn = document.querySelector('[data-action="load-more"]');
+
+
 searchForm.addEventListener('submit', handleFormSubmit);
   
   function handleFormSubmit(e) { 
@@ -39,7 +46,7 @@ async function main(value) {
     articleContainer.insertAdjacentHTML("beforebegin", loaderMarkup);
     clearArticlesContainer();
 
-    const photos = await fetchArticles(value);
+    const photos = await fetchArticles(value, currentPage);
 
     const loaderSpinner = document.querySelector('#loader');
     if (loaderSpinner) {
@@ -69,6 +76,15 @@ async function main(value) {
 
 function clearArticlesContainer() {
   articleContainer.innerHTML = '';
+}
+
+
+function resetPage() {
+  currentPage = 1;
+} 
+
+function incrementPage() {
+  currentPage += 1;
 }
 
 
