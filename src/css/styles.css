@@ -43,8 +43,17 @@ body {
   background-color: #0056b3;
 }
 
+.btn-submit:disabled {
+  background-color: #ced4da;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
 .load-more-btn {
   display: none;
+  margin: 0 auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 @media (max-width: 600px) {

@@ -13,7 +13,7 @@ const loaderMarkup  = '<div id="loader" class="loader"></div>';
 const searchForm = document.querySelector('.search-form');
 
 let currentPage = 1;
-let totalImages = 0;
+
 
 const searchBtn = document.querySelector('.btn-submit');
 const loadMoreBtn = document.querySelector('[data-action="load-more"]');
@@ -47,20 +47,28 @@ async function main(value) {
     clearArticlesContainer();
 
     const photos = await fetchArticles(value, currentPage);
+    const photo = photos.data.hits;
+    let totalImages = photos.data.totalHits;
+   
 
     const loaderSpinner = document.querySelector('#loader');
     if (loaderSpinner) {
       loaderSpinner.remove();
     }
     
-    if (photos.length === 0) {
+    if (photo.length === 0) {
         
       iziToast.error({
         title: 'Sorry, there are no images matching your search query',
         position: 'topRight',
-      })
+      });
+       clearArticlesContainer();
+                loadMoreBtn.style.display = 'none';
+                return;
     } else {
-        renderGallery(articleContainer, photos);
+      renderGallery(articleContainer, photo);
+      loadMoreBtn.style.display = 'block';
+      searchBtn.disabled = true;
       }
       
   
