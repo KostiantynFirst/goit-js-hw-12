@@ -30,7 +30,8 @@ const loadMoreBtn = document.querySelector('[data-action="load-more"]');
 searchForm.addEventListener('submit', handleFormSubmit);
   
   function handleFormSubmit(e) { 
-  e.preventDefault();
+    e.preventDefault();
+    resetPage();
 
   form = (e.currentTarget.elements.searchQuery.value).trim();
    if (form === null || form === '') {
@@ -42,7 +43,6 @@ searchForm.addEventListener('submit', handleFormSubmit);
      loadMoreBtn.style.display = 'none';
      main(form)
      searchForm.reset();
-     resetPage();
   }
 
   }
@@ -98,7 +98,7 @@ function removeLoaderSpinner() {
 loadMoreBtn.addEventListener('click', () => addCards(form));
 
 async function addCards(form) {
-
+  loadMoreBtn.insertAdjacentHTML("beforebegin", loaderMarkup);
   incrementPage();
 
   try {
@@ -118,10 +118,9 @@ async function addCards(form) {
     
   
    } else {
+     removeLoaderSpinner();
      renderGallery(articleContainer, photos);
      scrollToElementHeight();
-     
-      
      lightbox.refresh();
 
   }
