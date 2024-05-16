@@ -18,6 +18,7 @@ let photos = [];
 let form = null;
 let currentPage = 1;
 let totalImages = 0;
+let perPage = 15;
 
 let lightbox = new SimpleLightbox('.gallery a');
 
@@ -56,54 +57,12 @@ searchInputElement.addEventListener('input', () => {
   }
 });
 
-// async function main(value) {
- 
-//   try {
-
-//     articleContainer.insertAdjacentHTML("beforebegin", loaderMarkup);
-//     clearArticlesContainer();
-
-//     const images = await fetchArticles(value, currentPage);
-//     photos = [...images.hits];
-//     totalImages = images.totalHits;
-   
-//     const loaderSpinner = document.querySelector('#loader');
-//     if (loaderSpinner) {
-//       loaderSpinner.remove();
-//     }
-    
-//     if (!photos) {
-        
-//       iziToast.error({
-//         title: 'Sorry, there are no images matching your search query',
-//         position: 'topRight',
-//       });
-       
-//       clearArticlesContainer();
-//       loadMoreBtn.style.display = 'none';
-//       return;
-//     } else {
-//       renderGallery(articleContainer, photos);
-//       loadMoreBtn.style.display = 'block';
-//       searchBtn.disabled = true;
-//       }
-      
-  
-//       lightbox.refresh();
-      
-//   } catch (error) {
-//     console.log(error)
-//   }
-
-// }
-
-
 async function main(value) {
   try {
     articleContainer.insertAdjacentHTML("beforebegin", loaderMarkup);
     clearArticlesContainer();
 
-    const images = await fetchArticles(value, currentPage);
+    const images = await fetchArticles(value, currentPage, perPage);
     if (images && images.hits.length > 0) {
       photos = [...images.hits];
       totalImages = images.totalHits;
@@ -124,7 +83,6 @@ async function main(value) {
 
     lightbox.refresh();
   } catch (error) {
-    // Обрабатываем ошибки, если они возникли
     console.log(error);
   }
 }
@@ -148,7 +106,7 @@ async function addCards(form) {
   let maxPageNumber = totalImages / 15;
   let maxPageNumberRoundUp = Math.ceil(maxPageNumber);
    
-    const restPhoto = await fetchArticles(form, currentPage);
+    const restPhoto = await fetchArticles(form, currentPage, perPage);
     photos = [...restPhoto.hits];
 
    if (currentPage === maxPageNumberRoundUp) { 
