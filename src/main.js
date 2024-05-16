@@ -11,12 +11,15 @@ const articleContainer = document.querySelector('.gallery');
 const loaderMarkup  = '<div id="loader" class="loader"></div>';
 
 const searchForm = document.querySelector('.search-form');
+const searchInputElement = document.querySelector('input[class="form-control"]');
 
 
 let photos = [];
 let form = null;
 let currentPage = 1;
 let totalImages = 0;
+
+let lightbox = new SimpleLightbox('.gallery a');
 
 
 const searchBtn = document.querySelector('.btn-submit');
@@ -35,67 +38,117 @@ searchForm.addEventListener('submit', handleFormSubmit);
       position: 'topRight',
     });
    } else {
+     loadMoreBtn.style.display = 'none';
      main(form)
-    //  console.log(form);
      searchForm.reset();
-     
+     resetPage();
   }
 
-}
+  }
+
+
+searchInputElement.addEventListener('input', () => {
+  const inputValue = searchInputElement.value.trim();
+  if (inputValue) {
+    searchBtn.disabled = false;
+  } else {
+    searchBtn.disabled = true;
+  }
+});
+
+// async function main(value) {
+ 
+//   try {
+
+//     articleContainer.insertAdjacentHTML("beforebegin", loaderMarkup);
+//     clearArticlesContainer();
+
+//     const images = await fetchArticles(value, currentPage);
+//     photos = [...images.hits];
+//     totalImages = images.totalHits;
+   
+//     const loaderSpinner = document.querySelector('#loader');
+//     if (loaderSpinner) {
+//       loaderSpinner.remove();
+//     }
+    
+//     if (!photos) {
+        
+//       iziToast.error({
+//         title: 'Sorry, there are no images matching your search query',
+//         position: 'topRight',
+//       });
+       
+//       clearArticlesContainer();
+//       loadMoreBtn.style.display = 'none';
+//       return;
+//     } else {
+//       renderGallery(articleContainer, photos);
+//       loadMoreBtn.style.display = 'block';
+//       searchBtn.disabled = true;
+//       }
+      
+  
+//       lightbox.refresh();
+      
+//   } catch (error) {
+//     console.log(error)
+//   }
+
+// }
+
 
 async function main(value) {
- 
   try {
-
     articleContainer.insertAdjacentHTML("beforebegin", loaderMarkup);
     clearArticlesContainer();
 
     const images = await fetchArticles(value, currentPage);
-    photos = [...images.hits];
-    totalImages = images.totalHits;
-   
-    const loaderSpinner = document.querySelector('#loader');
-    if (loaderSpinner) {
-      loaderSpinner.remove();
-    }
-    
-    if (photos === 0) {
-        
+    if (images && images.hits.length > 0) {
+      photos = [...images.hits];
+      totalImages = images.totalHits;
+      removeLoaderSpinner();
+      renderGallery(articleContainer, photos);
+      loadMoreBtn.style.display = 'block';
+      searchBtn.disabled = true;
+    } else {
+      removeLoaderSpinner();
+      loadMoreBtn.style.display = 'none';
       iziToast.error({
         title: 'Sorry, there are no images matching your search query',
         position: 'topRight',
       });
-       clearArticlesContainer();
-          loadMoreBtn.style.display = 'none';
-          return;
-    } else {
-      renderGallery(articleContainer, photos);
-      incrementPage();
-      loadMoreBtn.style.display = 'block';
-      searchBtn.disabled = true;
-      }
-      
-  
-  let lightbox = new SimpleLightbox('.gallery a');
-      lightbox.refresh();
-      
-  } catch (error) {
-    console.log(error)
-  }
+      clearArticlesContainer();
+    }
+    
 
+    lightbox.refresh();
+  } catch (error) {
+    // Обрабатываем ошибки, если они возникли
+    console.log(error);
+  }
 }
 
 
+function removeLoaderSpinner() {
+  const loaderSpinner = document.querySelector('#loader');
+  if (loaderSpinner) {
+    loaderSpinner.remove();
+  }
+}
+
 loadMoreBtn.addEventListener('click', () => addCards(form));
 
-async function addCards(value) {
+async function addCards(form) {
+
+  incrementPage();
 
   try {
     
   let maxPageNumber = totalImages / 15;
   let maxPageNumberRoundUp = Math.ceil(maxPageNumber);
    
-    const restPhoto = await fetchArticles(value, currentPage);
+    const restPhoto = await fetchArticles(form, currentPage);
     photos = [...restPhoto.hits];
 
    if (currentPage === maxPageNumberRoundUp) { 
@@ -108,12 +161,15 @@ async function addCards(value) {
   
    } else {
      renderGallery(articleContainer, photos);
-     incrementPage();
+     scrollToElementHeight();
+     
+      
+     lightbox.refresh();
+
   }
   } catch (error) {
     console.log(error)
   }
-
 
 }
 
@@ -130,6 +186,26 @@ function resetPage() {
 function incrementPage() {
   currentPage += 1;
 }
+
+
+function scrollToDistance(distance) {
+  const delay = 500;
+  const scrollTimeout = setTimeout(() => {
+    window.scrollBy({
+      top: distance * 1.5,
+      left: 0,
+      behavior: 'smooth',
+    });
+    clearTimeout(scrollTimeout);
+  }, delay);
+};
+
+function scrollToElementHeight(){
+  const galleryItemElement = document.querySelector('.photo-card');
+  const galleryItemRect = galleryItemElement.getBoundingClientRect();
+  scrollToDistance(galleryItemRect.height);
+};
+
 
 
 
