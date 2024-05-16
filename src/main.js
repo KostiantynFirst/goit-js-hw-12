@@ -18,13 +18,16 @@ let photos = [];
 let form = null;
 let currentPage = 1;
 let totalImages = 0;
-let perPage = 15;
 
-let lightbox = new SimpleLightbox('.gallery a');
+let maxPageNumber = 0;
+
+
+const lightbox = new SimpleLightbox('.gallery a');
 
 
 const searchBtn = document.querySelector('.btn-submit');
 const loadMoreBtn = document.querySelector('[data-action="load-more"]');
+
 
 
 searchForm.addEventListener('submit', handleFormSubmit);
@@ -62,10 +65,15 @@ async function main(value) {
     articleContainer.insertAdjacentHTML("beforebegin", loaderMarkup);
     clearArticlesContainer();
 
-    const images = await fetchArticles(value, currentPage, perPage);
+     
+
+    const images = await fetchArticles(value, currentPage);
     if (images && images.hits.length > 0) {
       photos = [...images.hits];
       totalImages = images.totalHits;
+
+      maxPageNumber = Math.ceil(totalImages / 15);
+
       removeLoaderSpinner();
       renderGallery(articleContainer, photos);
       loadMoreBtn.style.display = 'block';
@@ -136,30 +144,59 @@ loadMoreBtn.addEventListener('click', () => addCards(form));
 //   }
 // }
 
+// async function addCards(form) {
+//   loadMoreBtn.insertAdjacentHTML("beforebegin", loaderMarkup);
+//   incrementPage();
+
+//   try {
+
+   
+//     const restPhoto = await fetchArticles(form, currentPage);
+//     photos = [...restPhoto.hits];
+
+//     if (currentPage === maxPageNumberRoundUp) {
+    
+     
+     
+//       const restPhoto = await fetchArticles(form, currentPage);
+//       photos = [...restPhoto.hits];
+//       removeLoaderSpinner();
+//       loadMoreBtn.style.display = 'none';
+
+//       iziToast.info({
+//         title: "We're sorry, but you've reached the end of search results.",
+//         position: 'topRight',
+//       });
+
+      
+
+//     }
+
+//     removeLoaderSpinner();
+//     renderGallery(articleContainer, photos);
+//     scrollToElementHeight();
+//     lightbox.refresh();
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+
 async function addCards(form) {
   loadMoreBtn.insertAdjacentHTML("beforebegin", loaderMarkup);
   incrementPage();
 
   try {
-    let maxPageNumber = totalImages / 15;
-    let maxPageNumberRoundUp = Math.ceil(maxPageNumber);
-   
-    const restPhoto = await fetchArticles(form, currentPage, perPage);
+    const restPhoto = await fetchArticles(form, currentPage);
     photos = [...restPhoto.hits];
 
-    if (currentPage === maxPageNumberRoundUp) {
-      loadMoreBtn.style.display = 'none';
-     
-      perPage = totalImages; // Adjust perPage to totalImages
-      const restPhoto = await fetchArticles(form, currentPage, perPage);
-      photos = [...restPhoto.hits];
-      removeLoaderSpinner();
+    if (currentPage >= maxPageNumber) {
+      loadMoreBtn.style.display = 'none'; 
 
       iziToast.info({
         title: "We're sorry, but you've reached the end of search results.",
         position: 'topRight',
       });
-
     }
 
     removeLoaderSpinner();
